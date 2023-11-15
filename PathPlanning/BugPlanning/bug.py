@@ -327,4 +327,4 @@ def main(bug_0, bug_1, bug_2):
 
 
 if __name__ == '__main__':
-    main(bug_0=True, bug_1=True, bug_2=True)
+    main()
