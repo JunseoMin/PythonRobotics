@@ -318,16 +318,13 @@ def main(bug_0, bug_1, bug_2):
             o_x.append(i)
             o_y.append(j)
 
-    if bug_0:
-        my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
-        my_Bug.bug0()
-    if bug_1:
-        my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
-        my_Bug.bug1()
-    if bug_2:
-        my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
-        my_Bug.bug2()
+    my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
+    my_Bug.bug0()
+    my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
+    my_Bug.bug1()
+    my_Bug = BugPlanner(s_x, s_y, g_x, g_y, o_x, o_y)
+    my_Bug.bug2()
 
 
 if __name__ == '__main__':
-    main(bug_0=True, bug_1=False, bug_2=False)
+    main(bug_0=True, bug_1=True, bug_2=True)
