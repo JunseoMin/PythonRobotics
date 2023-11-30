@@ -199,6 +199,9 @@ def main_3d_points():
         print("R:", R)
         print("T:", T)
 
+def main_algorithm_fail():
+    #todo: make algorithm fail
+    pass
 
 if __name__ == '__main__':
     main()

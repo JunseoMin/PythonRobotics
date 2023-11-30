@@ -274,7 +274,7 @@ class BugPlanner:
             plt.show()
 
 
-def main(bug_0, bug_1, bug_2):
+def main():
     # set obstacle positions
     o_x, o_y = [], []
 
