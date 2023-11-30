@@ -34,10 +34,10 @@ def icp_matching(previous_points, current_points):
 
     if show_animation:
         fig = plt.figure()
-        if previous_points.shape[0] == 3:
+        if previous_points.shape[0] == 3:   # if pointscloud 3d
            fig.add_subplot(111, projection='3d')
 
-    while dError >= EPS:
+    while dError >= EPS:    #thresholding
         count += 1
 
         if show_animation:  # pragma: no cover
@@ -144,7 +144,7 @@ def main():
     print(__file__ + " start!!")
 
     # simulation parameters
-    nPoint = 1000
+    nPoint = 10
     fieldLength = 50.0
     motion = [0.5, 2.0, np.deg2rad(-10.0)]  # movement [x[m],y[m],yaw[deg]]
 
@@ -185,7 +185,7 @@ def main_3d_points():
         px = (np.random.rand(nPoint) - 0.5) * fieldLength
         py = (np.random.rand(nPoint) - 0.5) * fieldLength
         pz = (np.random.rand(nPoint) - 0.5) * fieldLength
-        previous_points = np.vstack((px, py, pz))
+        previous_points = np.vstack((px, py, pz))   ## constant point(map)
 
         # current points
         cx = [math.cos(motion[3]) * x - math.sin(motion[3]) * z + motion[0]
@@ -201,8 +201,33 @@ def main_3d_points():
 
 def main_algorithm_fail():
     #todo: make algorithm fail
-    pass
+        # simulation parameters
+    fieldLength = 100.0
+
+    # make current points has distance to previous points
+    motion = [10., 20., np.deg2rad(20.0)]  # movement [x[m],y[m],yaw[deg]]
+
+    # previous points
+    px = (np.array([i for i in range(0,100)]) - 0.5) * fieldLength
+    py = (np.array([i for i in range(0,100)]) - 0.5) * fieldLength
+    previous_points = np.vstack((px, py))   # constant points
+
+    # make outliers
+    px[50] = 53
+    
+    # current points
+    cx = [math.cos(motion[2]) * x - math.sin(motion[2]) * y + motion[0]
+            for (x, y) in zip(px, py)]
+    cy = [math.sin(motion[2]) * x + math.cos(motion[2]) * y + motion[1]
+            for (x, y) in zip(px, py)]
+    current_points = np.vstack((cx, cy))
+
+    R, T = icp_matching(previous_points, current_points)
+    print("R:", R)
+    print("T:", T)
+
 
 if __name__ == '__main__':
-    main()
-    main_3d_points()
+    # main()
+    # main_3d_points()
+    main_algorithm_fail()
