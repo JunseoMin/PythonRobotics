@@ -3,6 +3,7 @@ Iterative Closest Point (ICP) SLAM example
 author: Atsushi Sakai (@Atsushi_twi), Göktuğ Karakaşlı, Shamil Gemuev
 """
 
+import time # for picture
 import math
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
@@ -10,7 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #  ICP parameters
-EPS = 0.0001
+# decide when should stop the loop
+EPS = 0.5
 MAX_ITER = 100
 
 show_animation = True
@@ -144,11 +146,11 @@ def main():
     print(__file__ + " start!!")
 
     # simulation parameters
-    nPoint = 10
+    nPoint = 1000
     fieldLength = 50.0
     motion = [0.5, 2.0, np.deg2rad(-10.0)]  # movement [x[m],y[m],yaw[deg]]
 
-    nsim = 3  # number of simulation
+    nsim = 1  # number of simulation
 
     for _ in range(nsim):
 
@@ -201,11 +203,10 @@ def main_3d_points():
 
 def main_algorithm_fail():
     #todo: make algorithm fail
-        # simulation parameters
+    # simulation parameters
     fieldLength = 100.0
-
     # make current points has distance to previous points
-    motion = [10., 20., np.deg2rad(20.0)]  # movement [x[m],y[m],yaw[deg]]
+    motion = [30., 20., np.deg2rad(20.0)]  # movement [x[m],y[m],yaw[deg]]
 
     # previous points
     px = (np.array([i for i in range(0,100)]) - 0.5) * fieldLength
@@ -214,7 +215,7 @@ def main_algorithm_fail():
 
     # make outliers
     px[50] = 53
-    
+
     # current points
     cx = [math.cos(motion[2]) * x - math.sin(motion[2]) * y + motion[0]
             for (x, y) in zip(px, py)]
@@ -228,6 +229,7 @@ def main_algorithm_fail():
 
 
 if __name__ == '__main__':
-    # main()
+    main()
     # main_3d_points()
     main_algorithm_fail()
+    time.sleep(30)
