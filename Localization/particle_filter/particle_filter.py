@@ -29,7 +29,7 @@ SIM_TIME = 50.0  # simulation time [s]
 MAX_RANGE = 20.0  # maximum observation range
 
 # Particle filter parameter
-NP = 100  # Number of Particle
+NP = 1000  # Number of Particle
 NTh = NP / 2.0  # Number of particle for re-sampling
 
 show_animation = True

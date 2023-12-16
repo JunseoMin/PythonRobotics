@@ -20,7 +20,7 @@ def rot_mat_2d(angle):
 
 
     """
-    return Rot.from_euler('z', angle).as_matrix()[0:2, 0:2]
+    return Rot.from_euler('z', angle).as_dcm()[0:2, 0:2]
 
 
 def angle_mod(x, zero_2_2pi=False, degree=False):

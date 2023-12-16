@@ -4,6 +4,7 @@ author: Atsushi Sakai (@Atsushi_twi), Göktuğ Karakaşlı, Shamil Gemuev
 """
 
 import time # for picture
+
 import math
 
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
