@@ -49,7 +49,7 @@ def main():
     hxEst = xEst
     hxTrue = xTrue
     hxDR = xTrue
-
+    h_x_est =xEst
     # Particle Filter history
     h_x_dr = np.zeros((STATE_SIZE, 1))
 
@@ -72,6 +72,8 @@ def main():
         hxDR = np.hstack((hxDR, xDR))
         h_x_dr = np.hstack((h_x_dr, x_dr))
         hxTrue = np.hstack((hxTrue, xTrue))
+
+        h_x_est = np.hstack((h_x_est, x_est))
 
         if show_animation:
             plt.cla()
@@ -98,13 +100,14 @@ def main():
                      hxDR[1, :], "-.k", label="Dead Reckoning")
             plt.plot(hxEst[0, :],
                      hxEst[1, :], "-b", label="EKF Estimated Trajectory")
+            plt.plot(np.array(h_x_est[0, :]).flatten(),
+                     np.array(h_x_est[1, :]).flatten(), "-r",label="PF Estimated Trajectory")
         
             plt.legend()
             plt.axis("equal")
             plt.grid(True)
             plt.pause(0.001)
 
-    sleep
 
 if __name__ == '__main__':
     main()

@@ -17,7 +17,7 @@ import numpy as np
 from utils.angle import rot_mat_2d
 
 # Estimation parameter of PF
-Q = np.diag([0.2]) ** 2  # range error
+Q = np.diag([0.5]) ** 2  # range error
 R = np.diag([2.0, np.deg2rad(40.0)]) ** 2  # input error
 
 #  Simulation parameter
