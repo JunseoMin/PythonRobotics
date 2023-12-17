@@ -24,27 +24,18 @@ NTh = NP / 2.0  # Number of particle for re-sampling
 show_animation = True
 ##################################################################
 
-########################### EKF params ############################
-# EKF state covariance
-Cx = np.diag([0.5, 0.5, np.deg2rad(30.0)]) ** 2
-
-#  Simulation parameter
-Q_sim = np.diag([0.2, np.deg2rad(1.0)]) ** 2
-R_sim = np.diag([1.0, np.deg2rad(10.0)]) ** 2
-
-DT = 0.1  # time tick [s]
-SIM_TIME = 0.1  # simulation time [s]
-MAX_RANGE = 20.0  # maximum observation range
-M_DIST_TH = 2.0  # Threshold of Mahalanobis distance for data association.
-STATE_SIZE = 3  # State size [x,y,yaw]
-LM_SIZE = 2  # LM state size [x,y]
-####################################################################
-
-
-
-
 def main():
-    Ekf = ekf.EKF(Cx,Q_sim,R_sim)
+    # EKF state covariance
+    Cx = np.diag([0.5, 0.5, np.deg2rad(30.0)]) ** 2
+
+    #  Simulation parameter
+    Q_sim_ekf = np.diag([0.2, np.deg2rad(1.0)]) ** 2
+    R_sim_ekf = np.diag([1.0, np.deg2rad(10.0)]) ** 2
+
+    STATE_SIZE = 3
+
+
+    Ekf = ekf.EKF(Cx,Q_sim_ekf,R_sim_ekf,STATE_SIZE=STATE_SIZE)
     print(__file__ + " start!!")
 
     ################################EKF############################
@@ -67,16 +58,6 @@ def main():
     hxTrue = xTrue
     hxDR = xTrue
     ##############################################################
-
-
-
-
-
-
-
-
-
-
     while SIM_TIME >= time:
         time += DT
         u = Ekf.calc_input()
@@ -118,7 +99,7 @@ def main():
             plt.pause(0.001)
 
 
-    pf.main()
+    #pf.main()
     pass
 
 if __name__ == '__main__':

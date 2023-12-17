@@ -12,15 +12,9 @@ import numpy as np
 show_animation = True
 
 class EKF:
-    # EKF state covariance
-    Cx = np.diag([0.5, 0.5, np.deg2rad(30.0)]) ** 2
-
-    #  Simulation parameter
-    Q_sim = np.diag([0.2, np.deg2rad(1.0)]) ** 2
-    R_sim = np.diag([1.0, np.deg2rad(10.0)]) ** 2
 
 
-    def __init__(self, Cx, Q_sim, R_sim ):
+    def __init__(self, Cx, Q_sim, R_sim,STATE_SIZE = 3 ):
         self.Cx = Cx
         self.Q_sim = Q_sim
         self.R_sim = R_sim
@@ -29,7 +23,7 @@ class EKF:
         self.SIM_TIME = 50.0  # simulation time [s]
         self.MAX_RANGE = 20.0  # maximum observation range
         self.M_DIST_TH = 2.0  # Threshold of Mahalanobis distance for data association.
-        self.STATE_SIZE = 3  # State size [x,y,yaw]
+        self.STATE_SIZE = STATE_SIZE  # State size [x,y,yaw]
         self.LM_SIZE = 2  # LM state size [x,y]
 
     def ekf_slam(self,xEst, PEst, u, z):
@@ -49,8 +43,8 @@ class EKF:
                 print("New LM")
                 # Extend state and covariance matrix
                 xAug = np.vstack((xEst, self.calc_landmark_position(xEst, z[iz, :])))
-                PAug = np.vstack((np.hstack((PEst, np.zeros((len(xEst), LM_SIZE)))),
-                                  np.hstack((np.zeros((LM_SIZE, len(xEst))), initP))))
+                PAug = np.vstack((np.hstack((PEst, np.zeros((len(xEst), self.LM_SIZE)))),
+                                  np.hstack((np.zeros((self.LM_SIZE, len(xEst))), initP))))
                 xEst = xAug
                 PEst = PAug
             lm = self.get_landmark_position_from_state(xEst, min_id)
@@ -65,7 +59,7 @@ class EKF:
         return xEst, PEst
 
 
-    def calc_input():
+    def calc_input(self):
         v = 1.0  # [m/s]
         yaw_rate = 0.1  # [rad/s]
         u = np.array([[v, yaw_rate]]).T
@@ -130,7 +124,7 @@ class EKF:
         return G, Fx,
 
 
-    def calc_landmark_position(x, z):
+    def calc_landmark_position(self, x, z):
         zp = np.zeros((2, 1))
 
         zp[0, 0] = x[0, 0] + z[0] * math.cos(x[2, 0] + z[1])
@@ -197,73 +191,73 @@ class EKF:
         return H
 
 
-    def pi_2_pi(angle):
+    def pi_2_pi(self,angle):
         return (angle + math.pi) % (2 * math.pi) - math.pi
 
 
-def main():
-    print(__file__ + " start!!")
+# def main():
+#     print(__file__ + " start!!")
 
-    time = 0.0
+#     time = 0.0
 
-    # RFID positions [x, y]
-    RFID = np.array([[10.0, -2.0],
-                     [15.0, 10.0],
-                     [3.0, 15.0],
-                     [-5.0, 20.0]])
+#     # RFID positions [x, y]
+#     RFID = np.array([[10.0, -2.0],
+#                      [15.0, 10.0],
+#                      [3.0, 15.0],
+#                      [-5.0, 20.0]])
 
-    # State Vector [x y yaw v]'
-    xEst = np.zeros((STATE_SIZE, 1))
-    xTrue = np.zeros((STATE_SIZE, 1))
-    PEst = np.eye(STATE_SIZE)
+#     # State Vector [x y yaw v]'
+#     xEst = np.zeros((STATE_SIZE, 1))
+#     xTrue = np.zeros((STATE_SIZE, 1))
+#     PEst = np.eye(STATE_SIZE)
 
-    xDR = np.zeros((STATE_SIZE, 1))  # Dead reckoning
+#     xDR = np.zeros((STATE_SIZE, 1))  # Dead reckoning
 
-    # history
-    hxEst = xEst
-    hxTrue = xTrue
-    hxDR = xTrue
+#     # history
+#     hxEst = xEst
+#     hxTrue = xTrue
+#     hxDR = xTrue
 
-    while SIM_TIME >= time:
-        time += DT
-        u = calc_input()
+#     while SIM_TIME >= time:
+#         time += DT
+#         u = calc_input()
 
-        xTrue, z, xDR, ud = observation(xTrue, xDR, u, RFID)
+#         xTrue, z, xDR, ud = observation(xTrue, xDR, u, RFID)
 
-        xEst, PEst = ekf_slam(xEst, PEst, ud, z)
+#         xEst, PEst = ekf_slam(xEst, PEst, ud, z)
 
-        x_state = xEst[0:STATE_SIZE]
+#         x_state = xEst[0:STATE_SIZE]
 
-        # store data history
-        hxEst = np.hstack((hxEst, x_state))
-        hxDR = np.hstack((hxDR, xDR))
-        hxTrue = np.hstack((hxTrue, xTrue))
+#         # store data history
+#         hxEst = np.hstack((hxEst, x_state))
+#         hxDR = np.hstack((hxDR, xDR))
+#         hxTrue = np.hstack((hxTrue, xTrue))
 
-        if show_animation:  # pragma: no cover
-            plt.cla()
-            # for stopping simulation with the esc key.
-            plt.gcf().canvas.mpl_connect(
-                'key_release_event',
-                lambda event: [exit(0) if event.key == 'escape' else None])
+#         if show_animation:  # pragma: no cover
+#             plt.cla()
+#             # for stopping simulation with the esc key.
+#             plt.gcf().canvas.mpl_connect(
+#                 'key_release_event',
+#                 lambda event: [exit(0) if event.key == 'escape' else None])
 
-            plt.plot(RFID[:, 0], RFID[:, 1], "*k")
-            plt.plot(xEst[0], xEst[1], ".r")
+#             plt.plot(RFID[:, 0], RFID[:, 1], "*k")
+#             plt.plot(xEst[0], xEst[1], ".r")
 
-            # plot landmark
-            for i in range(calc_n_lm(xEst)):
-                plt.plot(xEst[STATE_SIZE + i * 2],
-                         xEst[STATE_SIZE + i * 2 + 1], "xg")
+#             # plot landmark
+#             for i in range(calc_n_lm(xEst)):
+#                 plt.plot(xEst[STATE_SIZE + i * 2],
+#                          xEst[STATE_SIZE + i * 2 + 1], "xg")
 
-            plt.plot(hxTrue[0, :],
-                     hxTrue[1, :], "-b")
-            plt.plot(hxDR[0, :],
-                     hxDR[1, :], "-k")
-            plt.plot(hxEst[0, :],
-                     hxEst[1, :], "-r")
-            plt.axis("equal")
-            plt.grid(True)
-            plt.pause(0.001)
+#             plt.plot(hxTrue[0, :],
+#                      hxTrue[1, :], "-b")
+#             plt.plot(hxDR[0, :],
+#                      hxDR[1, :], "-k")
+#             plt.plot(hxEst[0, :],
+#                      hxEst[1, :], "-r")
+#             plt.axis("equal")
+#             plt.grid(True)
+#             plt.pause(0.001)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+    # main()
