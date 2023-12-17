@@ -17,7 +17,7 @@ import numpy as np
 from utils.angle import rot_mat_2d
 
 # Estimation parameter of PF
-Q = np.diag([0.5]) ** 2  # range error
+Q = np.diag([2.0]) ** 2  # range error
 R = np.diag([2.0, np.deg2rad(40.0)]) ** 2  # input error
 
 #  Simulation parameter
@@ -30,7 +30,7 @@ MAX_RANGE = 20.0  # maximum observation range
 
 # Particle filter parameter
 NP = 100  # Number of Particle
-NTh = NP / 2.0  # Number of particle for re-sampling
+NTh = NP / 5.0  # Number of particle for re-sampling
 
 show_animation = True
 

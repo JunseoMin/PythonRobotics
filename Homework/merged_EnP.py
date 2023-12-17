@@ -88,7 +88,7 @@ def main():
             # plot landmark
             for i in range(Ekf.calc_n_lm(xEst)):
                 plt.plot(xEst[STATE_SIZE + i * 2],
-                         xEst[STATE_SIZE + i * 2 + 1], "xg", label="EKF Landmark")
+                         xEst[STATE_SIZE + i * 2 + 1], "xg")
 
             # for i in range(particle.calc_n_lm(x_est)):
             #     plt.plot(x_est[STATE_SIZE + i * 2],
@@ -100,6 +100,10 @@ def main():
                      hxDR[1, :], "-.k", label="Dead Reckoning")
             plt.plot(hxEst[0, :],
                      hxEst[1, :], "-b", label="EKF Estimated Trajectory")
+            
+            plt.plot(np.array(h_x_dr[0, :]).flatten(),
+                     np.array(h_x_dr[1, :]).flatten(), "-.g", label = "PF dead Reckoning")            
+            
             plt.plot(np.array(h_x_est[0, :]).flatten(),
                      np.array(h_x_est[1, :]).flatten(), "-r",label="PF Estimated Trajectory")
         
