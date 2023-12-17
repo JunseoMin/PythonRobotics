@@ -35,7 +35,6 @@ NTh = NP / 2.0  # Number of particle for re-sampling
 show_animation = True
 
 
-# control input
 def calc_input():
     v = 1.0  # [m/s]
     yaw_rate = 0.1  # [rad/s]
@@ -251,7 +250,7 @@ def main():
             plt.plot(np.array(h_x_true[0, :]).flatten(),
                      np.array(h_x_true[1, :]).flatten(), "-b")
             plt.plot(np.array(h_x_dr[0, :]).flatten(),
-                     np.array(h_x_dr[1, :]).flatten(), "-k")
+                     np.array(h_x_dr[1, :]).flatten(), "-k")    #particlefilter
             plt.plot(np.array(h_x_est[0, :]).flatten(),
                      np.array(h_x_est[1, :]).flatten(), "-r")
             plot_covariance_ellipse(x_est, PEst)
