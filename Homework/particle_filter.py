@@ -31,6 +31,8 @@ class PF:
         self.MAX_RANGE = MAX_RANGE  # maximum observation range
         self.SIM_TIME = SIM_TIME
         self.DT = DT
+        self.R = np.diag([2.0, np.deg2rad(40.0)]) ** 2  # input error
+        self.Q = np.diag([0.2]) ** 2  # range error
 
     def calc_input():
         v = 1.0  # [m/s]
@@ -65,16 +67,14 @@ class PF:
         return x_true, z, xd, ud
 
 
-    def motion_model(self,x, u):
-        F = np.array([[1.0, 0, 0, 0],
-                      [0, 1.0, 0, 0],
-                      [0, 0, 1.0, 0],
-                      [0, 0, 0, 0]])
+    def motion_model(self, x, u):
+        F = np.array([[1.0, 0, 0],
+                      [0, 1.0, 0],
+                      [0, 0, 1.0]])
 
         B = np.array([[self.DT * math.cos(x[2, 0]), 0],
                       [self.DT * math.sin(x[2, 0]), 0],
-                      [0.0, self.DT],
-                      [1.0, 0.0]])
+                      [0.0, self.DT]])
 
         x = F.dot(x) + B.dot(u)
 
@@ -113,8 +113,8 @@ class PF:
             w = pw[0, ip]
 
             #  Predict with random input sampling
-            ud1 = u[0, 0] + np.random.randn() * R[0, 0] ** 0.5
-            ud2 = u[1, 0] + np.random.randn() * R[1, 1] ** 0.5
+            ud1 = u[0, 0] + np.random.randn() * self.R[0, 0] ** 0.5
+            ud2 = u[1, 0] + np.random.randn() * self.R[1, 1] ** 0.5
             ud = np.array([[ud1, ud2]]).T
             x = self.motion_model(x, ud)
 
@@ -124,7 +124,7 @@ class PF:
                 dy = x[1, 0] - z[i, 2]
                 pre_z = math.hypot(dx, dy)
                 dz = pre_z - z[i, 0]
-                w = w * self.gauss_likelihood(dz, math.sqrt(Q[0, 0]))
+                w = w * self.gauss_likelihood(dz, math.sqrt(self.Q[0, 0]))
 
             px[:, ip] = x[:, 0]
             pw[0, ip] = w
@@ -135,7 +135,7 @@ class PF:
         p_est = self.calc_covariance(x_est, px, pw)
 
         N_eff = 1.0 / (pw.dot(pw.T))[0, 0]  # Effective particle number
-        if N_eff < self.NTh:
+        if N_eff < self.NP/2.0:
             px, pw = self.re_sampling(px, pw)
         return x_est, p_est, px, pw
 
@@ -161,7 +161,7 @@ class PF:
         return px, pw
 
 
-    def plot_covariance_ellipse(x_est, p_est):  # pragma: no cover
+    def plot_covariance_ellipse(self,x_est, p_est):  # pragma: no cover
         p_xy = p_est[0:2, 0:2]
         eig_val, eig_vec = np.linalg.eig(p_xy)
 
@@ -196,65 +196,65 @@ class PF:
         plt.plot(px, py, "--r")
 
 
-def main():
-    print(__file__ + " start!!")
+# def main():
+#     print(__file__ + " start!!")
 
-    time = 0.0
+#     time = 0.0
 
-    # RF_ID positions [x, y]
-    rf_id = np.array([[10.0, 0.0],
-                      [10.0, 10.0],
-                      [0.0, 15.0],
-                      [-5.0, 20.0]])
+#     # RF_ID positions [x, y]
+#     rf_id = np.array([[10.0, 0.0],
+#                       [10.0, 10.0],
+#                       [0.0, 15.0],
+#                       [-5.0, 20.0]])
 
-    # State Vector [x y yaw v]'
-    x_est = np.zeros((4, 1))
-    x_true = np.zeros((4, 1))
+#     # State Vector [x y yaw v]'
+#     x_est = np.zeros((4, 1))
+#     x_true = np.zeros((4, 1))
 
-    px = np.zeros((4, self.NP))  # Particle store
-    pw = np.zeros((1, self.NP)) + 1.0 / self.NP  # Particle weight
-    x_dr = np.zeros((4, 1))  # Dead reckoning
+#     px = np.zeros((4, self.NP))  # Particle store
+#     pw = np.zeros((1, self.NP)) + 1.0 / self.NP  # Particle weight
+#     x_dr = np.zeros((4, 1))  # Dead reckoning
 
-    # history
-    h_x_est = x_est
-    h_x_true = x_true
-    h_x_dr = x_true
+#     # history
+#     h_x_est = x_est
+#     h_x_true = x_true
+#     h_x_dr = x_true
 
-    while SIM_TIME >= time:
-        time += DT
-        u = calc_input()
+#     while SIM_TIME >= time:
+#         time += DT
+#         u = calc_input()
 
-        x_true, z, x_dr, ud = observation(x_true, x_dr, u, rf_id)
+#         x_true, z, x_dr, ud = observation(x_true, x_dr, u, rf_id)
 
-        x_est, PEst, px, pw = pf_localization(px, pw, z, ud)
+#         x_est, PEst, px, pw = pf_localization(px, pw, z, ud)
 
-        # store data history
-        h_x_est = np.hstack((h_x_est, x_est))
-        h_x_dr = np.hstack((h_x_dr, x_dr))
-        h_x_true = np.hstack((h_x_true, x_true))
+#         # store data history
+#         h_x_est = np.hstack((h_x_est, x_est))
+#         h_x_dr = np.hstack((h_x_dr, x_dr))
+#         h_x_true = np.hstack((h_x_true, x_true))
 
-        if show_animation:
-            plt.cla()
-            # for stopping simulation with the esc key.
-            plt.gcf().canvas.mpl_connect(
-                'key_release_event',
-                lambda event: [exit(0) if event.key == 'escape' else None])
+#         if show_animation:
+#             plt.cla()
+#             # for stopping simulation with the esc key.
+#             plt.gcf().canvas.mpl_connect(
+#                 'key_release_event',
+#                 lambda event: [exit(0) if event.key == 'escape' else None])
 
-            for i in range(len(z[:, 0])):
-                plt.plot([x_true[0, 0], z[i, 1]], [x_true[1, 0], z[i, 2]], "-k")
-            plt.plot(rf_id[:, 0], rf_id[:, 1], "*k")
-            plt.plot(px[0, :], px[1, :], ".r")
-            plt.plot(np.array(h_x_true[0, :]).flatten(),
-                     np.array(h_x_true[1, :]).flatten(), "-b")
-            plt.plot(np.array(h_x_dr[0, :]).flatten(),
-                     np.array(h_x_dr[1, :]).flatten(), "-k")    #particlefilter
-            plt.plot(np.array(h_x_est[0, :]).flatten(),
-                     np.array(h_x_est[1, :]).flatten(), "-r")
-            plot_covariance_ellipse(x_est, PEst)
-            plt.axis("equal")
-            plt.grid(True)
-            plt.pause(0.001)
+#             for i in range(len(z[:, 0])):
+#                 plt.plot([x_true[0, 0], z[i, 1]], [x_true[1, 0], z[i, 2]], "-k")
+#             plt.plot(rf_id[:, 0], rf_id[:, 1], "*k")
+#             plt.plot(px[0, :], px[1, :], ".r")
+#             plt.plot(np.array(h_x_true[0, :]).flatten(),
+#                      np.array(h_x_true[1, :]).flatten(), "-b")
+#             plt.plot(np.array(h_x_dr[0, :]).flatten(),
+#                      np.array(h_x_dr[1, :]).flatten(), "-k")    #particlefilter
+#             plt.plot(np.array(h_x_est[0, :]).flatten(),
+#                      np.array(h_x_est[1, :]).flatten(), "-r")
+#             plot_covariance_ellipse(x_est, PEst)
+#             plt.axis("equal")
+#             plt.grid(True)
+#             plt.pause(0.001)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
